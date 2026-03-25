@@ -3,8 +3,15 @@ using UnityEngine.InputSystem;
 
 public class PlayerMovement : MonoBehaviour
 {
+    [Header("Movement")]
     public float moveSpeed = 5f;
     public float jumpForce = 10f;
+
+    [Header("Jump Settings")]
+    public float coyoteTime = 0.15f;      // Time allowed after leaving ground
+    public int maxJumps = 4;              // 1 = normal jump, 2 = double jump
+
+    [Header("Ground Check")]
     public LayerMask groundLayer;
 
     private Rigidbody2D rb;
@@ -12,7 +19,22 @@ public class PlayerMovement : MonoBehaviour
     private SpriteRenderer sr;
     private BoxCollider2D boxCollider;
 
-    private Vector2 movement;
+    private PlayerControls controls;
+    private float moveX;
+
+    private float coyoteTimer;
+    private int jumpCount;
+
+    private void Awake()
+    {
+        controls = new PlayerControls();
+
+        // Jump callback
+        controls.Player.Jump.performed += ctx => TryJump();
+    }
+
+    private void OnEnable() => controls.Enable();
+    private void OnDisable() => controls.Disable();
 
     void Start()
     {
@@ -24,54 +46,65 @@ public class PlayerMovement : MonoBehaviour
 
     void Update()
     {
-        // 🔹 Movement input (kun venstre/højre)
-        movement = new Vector2(
-            (Keyboard.current.dKey.isPressed ? 1 : 0) - (Keyboard.current.aKey.isPressed ? 1 : 0),
-            0
-        );
+        // Read horizontal movement
+        moveX = controls.Player.MoveHorizontally.ReadValue<float>();
 
-        // 🔹 Animation - running
-        bool isRunning = movement.x != 0;
-        animator.SetBool("isRunning", isRunning);
+        // Animation
+        animator.SetBool("isRunning", moveX != 0);
 
-        // 🔹 Flip sprite
-        if (movement.x > 0)
-            sr.flipX = true;
-        else if (movement.x < 0)
-            sr.flipX = false;
+        // Flip sprite
+        if (moveX > 0) sr.flipX = true;
+        else if (moveX < 0) sr.flipX = false;
 
-        // 🔹 Jump
-        if (Keyboard.current.spaceKey.wasPressedThisFrame && IsGrounded())
+        // Update coyote timer
+        if (IsGrounded())
         {
-            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
-            animator.SetTrigger("jumpTrigger");
+            coyoteTimer = coyoteTime;
+            jumpCount = 0; // Reset jumps when grounded
+        }
+        else
+        {
+            coyoteTimer -= Time.deltaTime;
         }
     }
 
     void FixedUpdate()
     {
-        // 🔹 Platformer movement
-        rb.linearVelocity = new Vector2(movement.x * moveSpeed, rb.linearVelocity.y);
+        rb.linearVelocity = new Vector2(moveX * moveSpeed, rb.linearVelocity.y);
+    }
+
+    private void TryJump()
+    {
+        // Can jump if:
+        // - On ground (coyoteTimer > 0)
+        // - OR still have jumps left (double jump)
+        if (coyoteTimer > 0 || jumpCount < maxJumps - 1)
+        {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, jumpForce);
+            animator.SetTrigger("jumpTrigger");
+
+            jumpCount++;
+            coyoteTimer = 0; // Prevent infinite coyote jumps
+        }
     }
 
     private bool IsGrounded()
     {
         float extraHeight = 0.1f;
 
-        RaycastHit2D raycastHit = Physics2D.Raycast(
+        RaycastHit2D hit = Physics2D.Raycast(
             boxCollider.bounds.center,
             Vector2.down,
             boxCollider.bounds.extents.y + extraHeight,
             groundLayer
         );
 
-        // Debug ray
         Debug.DrawRay(
             boxCollider.bounds.center,
             Vector2.down * (boxCollider.bounds.extents.y + extraHeight),
-            raycastHit.collider != null ? Color.green : Color.red
+            hit.collider != null ? Color.green : Color.red
         );
 
-        return raycastHit.collider != null;
+        return hit.collider != null;
     }
 }
