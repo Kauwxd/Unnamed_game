@@ -13255,9 +13255,13 @@ MonoBehaviour:
   m_GameObject: {fileID: 1443502619}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 52d52ed76384d1648992a687eccd27e5, type: 3}
+  m_Script: {fileID: 11500000, guid: 69e4891323e8dc34e978678c4b147a9d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: '::'
+  maxHealth: 100
+  currentHealth: 100
+  testHealAmount: 5
+  testDamageAmount: -5
 --- !u!1 &1480029283
 GameObject:
   m_ObjectHideFlags: 0
