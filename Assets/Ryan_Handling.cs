@@ -53,8 +53,20 @@ public class PlayerMovement : MonoBehaviour
         animator.SetBool("isRunning", moveX != 0);
 
         // Flip sprite
-        if (moveX > 0) sr.flipX = true;
-        else if (moveX < 0) sr.flipX = false;
+        Vector3 scale = transform.localScale;
+
+        if (moveX < 0 && transform.eulerAngles.y != 0f)
+        {
+            transform.rotation = Quaternion.Euler(0f, 0f, 0f);
+        }
+        else if (moveX > 0 && transform.eulerAngles.y != 180f)
+        {
+            transform.rotation = Quaternion.Euler(0f, 180f, 0f);
+        }
+
+        transform.localScale = scale;
+
+   
 
         // Update coyote timer
         if (IsGrounded())
