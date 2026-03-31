@@ -18,6 +18,6 @@ public class FireballScript : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D hitInfo)
     {
         Debug.Log(hitInfo.name); // Log the name of the object the fireball collides with
-        Destroy(gameObject);
+        //Destroy(gameObject);
     }
 }
