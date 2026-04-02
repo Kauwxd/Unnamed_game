@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Windows;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -17,7 +18,7 @@ public class PlayerMovement : MonoBehaviour
     private Rigidbody2D rb;
     private Animator animator;
     private SpriteRenderer sr;
-    private BoxCollider2D boxCollider;
+    private CapsuleCollider2D CapsuleCollider;
 
     private PlayerControls controls;
     private float moveX;
@@ -41,7 +42,7 @@ public class PlayerMovement : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         animator = GetComponent<Animator>();
         sr = GetComponent<SpriteRenderer>();
-        boxCollider = GetComponent<BoxCollider2D>();
+        CapsuleCollider = GetComponent<CapsuleCollider2D>();
     }
 
     void Update()
@@ -66,7 +67,10 @@ public class PlayerMovement : MonoBehaviour
 
         transform.localScale = scale;
 
-   
+        if (IsGrounded() && rb.linearVelocity.y < 0)
+        {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, -2f);
+        }
 
         // Update coyote timer
         if (IsGrounded())
@@ -82,7 +86,18 @@ public class PlayerMovement : MonoBehaviour
 
     void FixedUpdate()
     {
-        rb.linearVelocity = new Vector2(moveX * moveSpeed, rb.linearVelocity.y);
+        float targetSpeed = moveX * moveSpeed;
+
+        if (IsGrounded() && rb.linearVelocity.y < 0)
+        {
+            rb.linearVelocity = new Vector2(rb.linearVelocity.x, -2f);
+        }
+
+        // Smooth i stedet for instant (MEGET vigtigt)
+        float speedDif = targetSpeed - rb.linearVelocity.x;
+        float acceleration = IsGrounded() ? 50f : 20f;
+
+        rb.AddForce(new Vector2(speedDif * acceleration, 0f));
     }
 
     private void TryJump()
@@ -100,23 +115,46 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+
     private bool IsGrounded()
     {
-        float extraHeight = 0.1f;
+        float extraHeight = 0.05f;
 
-        RaycastHit2D hit = Physics2D.Raycast(
-            boxCollider.bounds.center,
+        RaycastHit2D hit = Physics2D.BoxCast(
+            CapsuleCollider.bounds.center,
+            CapsuleCollider.bounds.size,
+            0f,
             Vector2.down,
-            boxCollider.bounds.extents.y + extraHeight,
+            extraHeight,
             groundLayer
         );
 
-        Debug.DrawRay(
-            boxCollider.bounds.center,
-            Vector2.down * (boxCollider.bounds.extents.y + extraHeight),
-            hit.collider != null ? Color.green : Color.red
-        );
+        if (hit.collider != null)
+        {
+            // Kun ground hvis overfladen peger opad
+            return hit.normal.y > 0.5f;
+        }
 
-        return hit.collider != null;
+        return false;
     }
+
+
+    // private bool IsGrounded()
+    //  {
+    //  float extraHeight = 0.1f;
+
+    //   RaycastHit2D hit = Physics2D.Raycast(
+    ////       Vector2.down,
+    //         CapsuleCollider.bounds.extents.y + extraHeight,
+    //       groundLayer
+    //   );
+
+    //     Debug.DrawRay(
+    //      CapsuleCollider.bounds.center,
+    //       Vector2.down * (CapsuleCollider.bounds.extents.y + extraHeight),
+    //      hit.collider != null ? Color.green : Color.red
+    //   );
+    //
+    //      return hit.collider != null;
+    // }
 }

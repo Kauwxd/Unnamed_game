@@ -23,7 +23,6 @@ public class EnemyPatrol : MonoBehaviour
         rb = GetComponent<Rigidbody2D>();
         sr = GetComponent<SpriteRenderer>();
 
-        sr.flipX = direction > 0;
     }
 
     void Update()
@@ -49,6 +48,9 @@ public class EnemyPatrol : MonoBehaviour
     void Flip()
     {
         direction *= -1;
-        sr.flipX = direction > 0;
+
+        Vector3 scale = transform.localScale;
+        scale.x *= -1;
+        transform.localScale = scale;
     }
 }
