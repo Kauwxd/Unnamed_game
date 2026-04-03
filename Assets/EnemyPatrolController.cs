@@ -17,6 +17,8 @@ public class EnemyPatrol : MonoBehaviour
 
     private Rigidbody2D rb;
     private SpriteRenderer sr;
+    [SerializeField]
+    private float PlayerCollisionDamage = 20f;
 
     void Start()
     {
@@ -53,4 +55,21 @@ public class EnemyPatrol : MonoBehaviour
         scale.x *= -1;
         transform.localScale = scale;
     }
+
+    void OnTriggerEnter2D(Collider2D other)
+    {
+        if (other.CompareTag("Player"))
+        {
+            HealthHandler health = other.GetComponent<HealthHandler>();
+
+            if (health != null)
+            {
+                health.ChangeHealth(PlayerCollisionDamage); // giver damage
+            }
+
+            Debug.Log("Player hit by ground enemy!");
+        }
+    }
+
+
 }
