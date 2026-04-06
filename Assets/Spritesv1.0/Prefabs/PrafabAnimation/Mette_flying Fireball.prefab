@@ -103,6 +103,7 @@ GameObject:
   - component: {fileID: 6044528531354702885}
   - component: {fileID: 3608005589460704774}
   - component: {fileID: 8294194403720772327}
+  - component: {fileID: 2282323436139831025}
   m_Layer: 0
   m_Name: Mette_flying Fireball
   m_TagString: Untagged
@@ -199,7 +200,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDamping: 0
   m_AngularDamping: 0.05
-  m_GravityScale: 1
+  m_GravityScale: 0
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -211,3 +212,20 @@ Rigidbody2D:
   m_SleepingMode: 1
   m_CollisionDetection: 1
   m_Constraints: 0
+--- !u!114 &2282323436139831025
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4186005160473623492}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0a781466364c3304fbf4403f220d8e61, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::FireballScript
+  speed: 20
+  rb: {fileID: 8294194403720772327}
+  damage: 35
+  impactEffect: {fileID: 2169601990382375911, guid: d86e7796168ef9e4cb5b661db4d9e446, type: 3}
+  AutoDestroyTimer: 10
